@@ -1,253 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="x-ua-compatible" content="ie=9">
-    <title>HeliKOS OS</title>
-    <hta:application id="HeliKOS" border="thin" caption="yes" showintaskbar="yes" singleinstance="yes" sysmenu="yes" windowstate="normal" scroll="no">
-
+    <title>HeliK OS Downloader</title>
+    <hta:application 
+        id="oHeliK"
+        border="thin"
+        caption="yes"
+        scroll="no"
+        windowstate="normal"
+    >
     <style>
-        body { background-color: #000; color: #fff; font-family: "Segoe UI", sans-serif; margin: 0; padding: 0; overflow: hidden; }
-        #bootScreen, #appLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: none; text-align: center; }
-        #bootScreen { background: #000; padding-top: 200px; }
-        #appLoader { background: rgba(0,0,0,0.9); padding-top: 250px; }
-        
-        .spinner { border: 5px solid #222; border-top: 5px solid #0cf; border-radius: 50%; width: 50px; height: 50px; display: inline-block; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        #powerContainer { width: 100%; text-align: center; margin-top: 200px; }
-        #btnTurnOn { padding: 20px 50px; font-size: 20px; background: #222; color: #fff; border: 1px solid #555; cursor: pointer; }
-        
-        #safetyScreen { display: none; background: #FFF; width: 600px; margin: 50px auto; padding: 40px; border-radius: 10px; text-align: center; color: #000; }
-        #gameMenu { display: none; text-align: center; padding-top: 50px; }
-        
-        .app-btn { display: inline-block; width: 140px; height: 140px; margin: 20px; background: #222; color: white; border: 2px solid #444; line-height: 140px; cursor: pointer; font-weight: bold; }
-
-        /* Calculator View */
-        #calcView { display: none; width: 320px; margin: 20px auto; background: #222; padding: 20px; border-radius: 10px; border: 2px solid #444; }
-        #calcDisplay { width: 100%; height: 50px; background: #000; color: #0f0; border: 1px solid #333; text-align: right; font-size: 20px; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
-        .calc-row { clear: both; overflow: hidden; margin-bottom: 5px; }
-        .calc-btn { float: left; width: 50px; height: 50px; background: #333; color: white; text-align: center; line-height: 50px; cursor: pointer; border-radius: 5px; margin-right: 5px; font-weight: bold; }
-        .calc-btn:hover { background: #555; }
-        .calc-op { background: #0078d7; }
-
-        /* Games Hub & Notepad common */
-        #notepadView, #gamesHubView { display: none; width: 840px; margin: 10px auto; background: #fff; padding: 10px; border-radius: 5px; color: #000; }
-        #fileList { width: 240px; height: 380px; border: 1px solid #ccc; float: left; overflow-y: auto; background: #f4f4f4; text-align: left; }
-        #noteArea { width: 570px; float: right; }
-        #noteText { width: 100%; height: 380px; font-family: "Consolas", monospace; font-size: 14px; border: 1px solid #ddd; padding: 5px; box-sizing: border-box; }
-        .file-item { padding: 8px; border-bottom: 1px solid #ddd; cursor: pointer; color: #000; font-size: 13px; }
-        .active-note { background: #0078d7 !important; color: white !important; }
-        .toolbar { background: #eee; padding: 10px; margin-bottom: 5px; clear: both; text-align: left;}
-        button { padding: 5px 12px; cursor: pointer; margin-right: 5px; }
-        
-        .game-icon { width: 140px; height: 160px; margin: 20px; background: #eee; border: 1px solid #bbb; display: inline-block; vertical-align: top; color: #000; padding-top: 30px; cursor: pointer; border-radius: 8px;}
-        .game-icon:hover { background: #ddd; border-color: #0078d7; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f0f0; text-align: center; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; }
+        #yesBtn { background-color: #4CAF50; color: white; font-weight: bold; }
+        #noBtn { background-color: #f44336; color: white; }
     </style>
 
-    <script type="text/javascript">
-        var fso = new ActiveXObject("Scripting.FileSystemObject");
-        var shell = new ActiveXObject("WScript.Shell");
-        var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
-        var folderPath = appData + "\\HeliKOS Notepad Saves";
-        var currentFile = "";
+    <script language="VBScript">
+        Sub Window_OnLoad
+            window.resizeTo 400, 200
+        End Sub
 
-        window.onload = function() { 
-            window.resizeTo(900, 700); 
-            if (!fso.FolderExists(folderPath)) { fso.CreateFolder(folderPath); }
-        };
+        Sub DownloadRepo
+            Set shell = CreateObject("WScript.Shell")
+            ' Define the GitHub ZIP URL and the destination (Desktop)
+            Dim repoUrl, zipPath
+            repoUrl = "https://github.com/YourUsername/HeliK-OS/archive/refs/heads/main.zip"
+            zipPath = shell.SpecialFolders("Desktop") & "\HeliK-OS.zip"
+            
+            ' PowerShell command to download and extract
+            psCommand = "powershell -Command ""Invoke-WebRequest -Uri '" & repoUrl & "' -OutFile '" & zipPath & "'; " & _
+                        "Expand-Archive -Path '" & zipPath & "' -DestinationPath '" & shell.SpecialFolders("Desktop") & "\HeliK-OS' -Force"""
+            
+            ' Run the command hidden
+            shell.Run psCommand, 0, True
+            
+            MsgBox "Download and Extraction Complete! Check your Desktop.", 64, "Success"
+            window.close()
+        End Sub
 
-        function startBoot() {
-            document.getElementById('powerContainer').style.display = 'none';
-            document.getElementById('bootScreen').style.display = 'block';
-            setTimeout(function() {
-                document.getElementById('bootScreen').style.display = 'none';
-                document.getElementById('safetyScreen').style.display = 'block';
-                document.body.style.backgroundColor = "#CCC";
-            }, 2250);
-        }
-
-        function showAppLoader(callback) {
-            document.getElementById('appLoader').style.display = 'block';
-            setTimeout(function() {
-                document.getElementById('appLoader').style.display = 'none';
-                if(callback) callback();
-            }, 1000);
-        }
-
-        function goToMenu() {
-            document.getElementById('safetyScreen').style.display = 'none';
-            document.body.style.backgroundColor = "#111";
-            document.getElementById('gameMenu').style.display = 'block';
-        }
-
-        function openApp(appName) {
-            showAppLoader(function() {
-                document.getElementById('menuIcons').style.display = 'none';
-                if(appName == 'notepad') { document.getElementById('notepadView').style.display = 'block'; listNotes(); }
-                else if(appName == 'calc') { document.getElementById('calcView').style.display = 'block'; }
-                else if(appName == 'games') { document.getElementById('gamesHubView').style.display = 'block'; }
-            });
-        }
-
-        function backToMenu() {
-            showAppLoader(function() {
-                document.getElementById('notepadView').style.display = 'none';
-                document.getElementById('calcView').style.display = 'none';
-                document.getElementById('gamesHubView').style.display = 'none';
-                document.getElementById('menuIcons').style.display = 'block';
-            });
-        }
-
-        /* Calculator Logic */
-        function calcInput(val) {
-            var d = document.getElementById('calcDisplay');
-            if(val == 'C') d.value = "";
-            else if(val == '=') { try { d.value = eval(d.value); } catch(e) { d.value = "Error"; } }
-            else d.value += val;
-        }
-
-        /* Game Launcher Logic */
-        function launchFNF() {
-            try {
-                // Get the folder where HeliKOS.hta is actually sitting
-                var htaPath = window.location.pathname.substring(1).replace(/\//g, "\\");
-                if (htaPath.charAt(0) == "\\") htaPath = htaPath.substring(1); 
-                var currentDir = fso.GetParentFolderName(htaPath);
-                
-                // Construct path based on your screenshots
-                var fullPath = currentDir + "\\data\\Games\\FNF\\funkin-windows-64bit (3)\\Funkin.exe";
-                
-                if (fso.FileExists(fullPath)) {
-                    shell.Run('"' + fullPath + '"');
-                } else {
-                    alert("File not found at:\n" + fullPath);
-                }
-            } catch(e) { alert("Launch Error: " + e.message); }
-        }
-
-        /* Notepad Logic (Restored from source) [cite: 95, 105, 110] */
-        function listNotes() {
-            var listDiv = document.getElementById('fileList');
-            listDiv.innerHTML = "";
-            try {
-                var folder = fso.GetFolder(folderPath);
-                var files = new Enumerator(folder.Files);
-                for (; !files.atEnd(); files.moveNext()) {
-                    var file = files.item();
-                    if (fso.GetExtensionName(file.Name).toLowerCase() == "txt") {
-                        var div = document.createElement("div");
-                        div.className = "file-item" + (currentFile == file.Name ? " active-note" : "");
-                        div.innerHTML = "📄 " + file.Name;
-                        div.onclick = (function(fn) { return function() { loadNote(fn); }; })(file.Name);
-                        listDiv.appendChild(div);
-                    }
-                }
-            } catch(e) {}
-        }
-
-        function loadNote(filename) {
-            try {
-                currentFile = filename;
-                var fullPath = folderPath + "\\" + filename;
-                var fileObj = fso.GetFile(fullPath);
-                if (fileObj.Size > 0) {
-                    var ts = fso.OpenTextFile(fullPath, 1);
-                    document.getElementById('noteText').value = ts.ReadAll();
-                    ts.Close();
-                } else { document.getElementById('noteText').value = ""; }
-                listNotes();
-            } catch(err) { alert("Load Error: " + err.message); }
-        }
-
-        function saveCurrent() {
-            if (currentFile == "") { saveAsNew(); }
-            else {
-                try {
-                    var file = fso.CreateTextFile(folderPath + "\\" + currentFile, true);
-                    file.Write(document.getElementById('noteText').value);
-                    file.Close();
-                    alert("Saved: " + currentFile);
-                } catch(err) { alert("Save Error: " + err.message); }
-            }
-        }
-
-        function saveAsNew() {
-            var name = prompt("Enter filename:", "MyNote");
-            if (name) {
-                if (name.toLowerCase().indexOf(".txt") == -1) name += ".txt";
-                currentFile = name;
-                saveCurrent();
-                listNotes();
-            }
-        }
+        Sub CloseApp
+            window.close()
+        End Sub
     </script>
 </head>
 <body>
-    <div id="bootScreen"><h1>HeliKOS</h1><div class="spinner"></div><p>System Starting...</p></div>
-    <div id="appLoader"><div class="spinner"></div><p>Loading...</p></div>
-    <div id="powerContainer"><button id="btnTurnOn" onclick="startBoot()">Turn On</button></div>
-
-    <div id="safetyScreen" onclick="goToMenu()">
-        <h2>⚠ WARNING - HEALTH AND SAFETY</h2>
-        <p>Before playing, read the health and safety booklet.</p>
-        <p style="color:blue">www.nintendo.com/healthsafety/</p>
-        <br><p style="color:#666; font-size:12px;">Click to continue</p>
-    </div>
-
-    <div id="gameMenu">
-        <div id="menuIcons">
-            <h1>HeliKOS Home Menu</h1>
-            <div class="app-btn" onclick="openApp('notepad')">NOTEPAD</div>
-            <div class="app-btn" onclick="openApp('calc')">CALC</div>
-            <div class="app-btn" onclick="openApp('games')">GAMES</div>
-            <div class="app-btn" onclick="window.close()" style="background:#500">OFF</div>
-        </div>
-
-        <div id="calcView">
-            <input type="text" id="calcDisplay" readonly>
-            <div class="calc-row">
-                <div class="calc-btn" onclick="calcInput('7')">7</div>
-                <div class="calc-btn" onclick="calcInput('8')">8</div>
-                <div class="calc-btn" onclick="calcInput('9')">9</div>
-                <div class="calc-btn calc-op" onclick="calcInput('/')">/</div>
-            </div>
-            <div class="calc-row">
-                <div class="calc-btn" onclick="calcInput('4')">4</div>
-                <div class="calc-btn" onclick="calcInput('5')">5</div>
-                <div class="calc-btn" onclick="calcInput('6')">6</div>
-                <div class="calc-btn calc-op" onclick="calcInput('*')">X</div>
-            </div>
-            <div class="calc-row">
-                <div class="calc-btn" onclick="calcInput('1')">1</div>
-                <div class="calc-btn" onclick="calcInput('2')">2</div>
-                <div class="calc-btn" onclick="calcInput('3')">3</div>
-                <div class="calc-btn calc-op" onclick="calcInput('-')">-</div>
-            </div>
-            <div class="calc-row">
-                <div class="calc-btn" onclick="calcInput('0')">0</div>
-                <div class="calc-btn calc-op" onclick="calcInput('C')">C</div>
-                <div class="calc-btn calc-op" onclick="calcInput('=')">=</div>
-                <div class="calc-btn calc-op" onclick="calcInput('+')">+</div>
-            </div>
-            <button onclick="backToMenu()" style="width:100%; margin-top:15px;">Exit</button>
-        </div>
-
-        <div id="gamesHubView">
-            <div class="toolbar"><b>HeliKOS Games Hub</b> <button onclick="backToMenu()" style="float:right">Back</button></div>
-            <div class="game-icon" ondblclick="launchFNF()">🎵<br><b>FNF</b><br><small>(Double Click)</small></div>
-            <div class="game-icon">❓<br>Unknown</div>
-            <div class="game-icon">❓<br>Unknown</div>
-        </div>
-
-        <div id="notepadView">
-            <div class="toolbar">
-                <button onclick="saveCurrent()">Save</button>
-                <button onclick="saveAsNew()">Save As New</button>
-                <button onclick="backToMenu()" style="float:right">Back</button>
-            </div>
-            <div id="fileList"></div>
-            <div id="noteArea"><textarea id="noteText" placeholder="Start typing..."></textarea></div>
-        </div>
-    </div>
+    <h3>Do You Want To Download HeliK OS?</h3>
+    <button id="yesBtn" onclick="DownloadRepo()">Yes</button>
+    <button id="noBtn" onclick="CloseApp()">No</button>
 </body>
 </html>
