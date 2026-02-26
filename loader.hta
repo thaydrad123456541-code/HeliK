@@ -4,38 +4,77 @@
     <title>HeliK OS Downloader</title>
     <hta:application 
         id="oHeliK"
+        applicationname="HeliK Downloader"
         border="thin"
         caption="yes"
-        scroll="no"
+        showintaskbar="yes"
+        singleinstance="yes"
+        sysmenu="yes"
         windowstate="normal"
+        scroll="no"
     >
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f0f0; text-align: center; padding: 20px; }
-        button { padding: 10px 20px; margin: 10px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; }
-        #yesBtn { background-color: #4CAF50; color: white; font-weight: bold; }
-        #noBtn { background-color: #f44336; color: white; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background-color: #1a1a1a; 
+            color: #ffffff;
+            text-align: center; 
+            padding: 20px;
+            margin: 0;
+        }
+        h2 { color: #00ccff; font-size: 18px; margin-bottom: 20px; }
+        .btn-container { margin-top: 25px; }
+        button { 
+            padding: 10px 25px; 
+            margin: 0 10px; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            border: none;
+            font-weight: bold;
+            width: 100px;
+        }
+        #yesBtn { background-color: #28a745; color: white; }
+        #yesBtn:hover { background-color: #218838; }
+        #noBtn { background-color: #dc3545; color: white; }
+        #noBtn:hover { background-color: #c82333; }
+        #status { margin-top: 15px; font-size: 12px; color: #aaa; }
     </style>
 
     <script language="VBScript">
+        ' Set the window size
         Sub Window_OnLoad
-            window.resizeTo 400, 200
+            window.resizeTo 450, 250
         End Sub
 
         Sub DownloadRepo
+            document.getElementById("status").innerHTML = "Downloading... please wait."
+            document.getElementById("yesBtn").disabled = True
+            
             Set shell = CreateObject("WScript.Shell")
-            ' Define the GitHub ZIP URL and the destination (Desktop)
-            Dim repoUrl, zipPath
-            repoUrl = "https://github.com/YourUsername/HeliK-OS/archive/refs/heads/main.zip"
-            zipPath = shell.SpecialFolders("Desktop") & "\HeliK-OS.zip"
             
-            ' PowerShell command to download and extract
-            psCommand = "powershell -Command ""Invoke-WebRequest -Uri '" & repoUrl & "' -OutFile '" & zipPath & "'; " & _
-                        "Expand-Archive -Path '" & zipPath & "' -DestinationPath '" & shell.SpecialFolders("Desktop") & "\HeliK-OS' -Force"""
+            ' The URL to the repository ZIP
+            Dim repoUrl, desktopPath, zipFile, extractFolder
+            repoUrl = "https://github.com/thaydrad123456541-code/HeliK/archive/refs/heads/main.zip"
             
-            ' Run the command hidden
+            desktopPath = shell.SpecialFolders("Desktop")
+            zipFile = desktopPath & "\HeliK_Download.zip"
+            extractFolder = desktopPath & "\HeliK-Main"
+
+            ' PowerShell command to Download and Extract
+            ' 1. Download the file
+            ' 2. Create folder if not exists
+            ' 3. Extract contents
+            ' 4. Delete the temporary zip
+            psCommand = "powershell -WindowStyle Hidden -Command ""& {" & _
+                "Invoke-WebRequest -Uri '" & repoUrl & "' -OutFile '" & zipFile & "';" & _
+                "Expand-Archive -Path '" & zipFile & "' -DestinationPath '" & extractFolder & "' -Force;" & _
+                "Remove-Item '" & zipFile & "';" & _
+                "}"""
+            
+            ' Run the command
             shell.Run psCommand, 0, True
             
-            MsgBox "Download and Extraction Complete! Check your Desktop.", 64, "Success"
+            MsgBox "HeliK OS has been downloaded and extracted to your Desktop!", 64, "Success"
             window.close()
         End Sub
 
@@ -45,8 +84,13 @@
     </script>
 </head>
 <body>
-    <h3>Do You Want To Download HeliK OS?</h3>
-    <button id="yesBtn" onclick="DownloadRepo()">Yes</button>
-    <button id="noBtn" onclick="CloseApp()">No</button>
+    <h2>Do You Want To Download HeliK OS?</h2>
+    
+    <div class="btn-container">
+        <button id="yesBtn" onclick="DownloadRepo()">Yes</button>
+        <button id="noBtn" onclick="CloseApp()">No</button>
+    </div>
+
+    <div id="status"></div>
 </body>
 </html>
